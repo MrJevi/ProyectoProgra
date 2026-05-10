@@ -51,27 +51,58 @@ window.filtrar = function() {
 
 
 document.getElementById('formLibro').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData();
-    formData.append('titulo', document.getElementById('titulo').value);
-    formData.append('autor', document.getElementById('autor').value);
-    formData.append('categoria', document.getElementById('categoria').value);
-    formData.append('archivo', document.getElementById('archivo').files[0]);
 
-    Swal.fire({ title: 'Agregando libro...', didOpen: () => Swal.showLoading() });
+    e.preventDefault();
+
+    const archivo = document.getElementById('archivo').files[0];
+
+    // Guardar libro
+    const libro = {
+        id: Date.now(),
+        titulo: document.getElementById('titulo').value,
+        autor: document.getElementById('autor').value,
+        categoria: document.getElementById('categoria').value
+    };
 
     try {
-        const res = await fetch(API_URL, { method: 'POST', body: formData });
-        if (res.ok) {
-            Swal.fire('¡Éxito!', 'La obra ha sido añadida al catálogo.', 'success');
-            document.getElementById('formLibro').reset();
-            cargarCatalogo(); // Recargar lista
-        } else {
-            Swal.fire('Error', 'No se pudo guardar el libro.', 'error');
-        }
+
+        // POST libro
+        await fetch("https://localhost:7157/api/libros", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(libro)
+        });
+
+        // POST PDF
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+
+        await fetch("https://localhost:7157/api/libros/subir-pdf", {
+            method: 'POST',
+            body: formData
+        });
+
+        Swal.fire(
+            'Éxito',
+            'Libro y PDF guardados correctamente',
+            'success'
+        );
+
+        document.getElementById('formLibro').reset();
+
+        cargarCatalogo();
+
     } catch (error) {
-        Swal.fire('Error de conexión', 'Asegúrate de que la API esté corriendo.', 'error');
+
+        Swal.fire(
+            'Error',
+            error.message,
+            'error'
+        );
+
+        console.error(error);
     }
 });
 
