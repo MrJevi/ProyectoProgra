@@ -4,6 +4,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+// Conexion del Gestor para que la API 
+builder.Services.AddSingleton<BibliotecaAPI.DataStructures.Services.GestorBiblioteca>();
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
